@@ -84,7 +84,6 @@ router.get("/:id", async (req, res) => {
 });
 
 
-// ADDING PRODUCT TO CART
 
 // Addiing cart_item to cart
 router.post("/:id/AddToCart", verifyToken, async (req, res) => {
