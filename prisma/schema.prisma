@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  username String @unique
+  password String
+  firstname String @db.VarChar(20)
+  lastname String @db.VarChar(20)
+  contact String?
+  isAdmin Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cart Cart?
+  order Order?
+  wishlist Wishlist?
+}
+
+model Product {
+  id String @id @default(uuid())
+  name String @db.VarChar(50)
+  description String?
+  img String?
+  category Product_Category @relation(fields: [category_id], references: [id])
+  category_id String
+  inventory Product_Inventory?
+  price Float
+  discount Float
+  likes Int @default(0)
+  visited Int @default(0)
+  no_of_sells Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bundles Product_Bundle[]
+  cart_item Cart_Item[]
+  wishlist Wishlist[]
+}
+
+model Product_Category {
+  id String @id @default(uuid())
+  name String @db.VarChar(50) @unique
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product Product[]
+}
+
+model Product_Inventory {
+  id String @id @default(uuid())
+  product Product @relation(fields: [product_id], references: [id])
+  product_id String
+  stock Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Product_Bundle{
+  id String @id @default(uuid())
+  product Product[]
+  original_price Float
+  discounted_price Float
+  validTill DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+}
+
+model Cart_Item{
+  id String @id @default(uuid())
+  cart Cart @relation(fields: [cart_id], references: [id])
+  cart_id String
+  product Product @relation(fields: [product_id], references: [id])
+  product_id String
+  quantity Int
+  cost Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cart{
+  id String @id @default(uuid())
+  user User @relation(fields: [user_id], references: [id])
+  user_id String
+  total_cost Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items Cart_Item[]
+  order Order?
+}
+
+model Order{
+  id String @id @default(uuid())
+  user User @relation(fields: [user_id], references: [id])
+  user_id String
+  cart Cart @relation(fields: [cart_id], references: [id])
+  cart_id String
+  total_cost Float
+  shipping_address String @db.VarChar(200)
+  payment_status Boolean @default(false)
+  shipping_status Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wishlist{
+  user User @relation(fields: [id], references: [id])
+  id String @id @unique
+  products Product[]
+}
